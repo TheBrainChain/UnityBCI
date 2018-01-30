@@ -6,6 +6,13 @@ Future home of the UnityBCI project created in the Biomedical Functional Imaging
 Supplemental video files can be found: ________________________
 
 
+![alt text](/GUI.PNG)
+
+![alt text](/3.PNG)
+
+
+
+
 Consider this project just barely stable
 
 #To run:
