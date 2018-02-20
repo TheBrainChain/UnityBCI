@@ -44,7 +44,6 @@ public class BCI_Task : MonoBehaviour
 
 	public void OpenShell(bool start)
 	{	
-		print (start);
 		BCIinst[1] = new BCI_Class ("127.0.0.1", 55404);
 		ProcessStartInfo PSI = new ProcessStartInfo("Assets\\BCI2000\\prog\\operator.exe");
 		PSI.Arguments = "--StartupIdle --Telnet 127.0.0.1:" + "3"+ "997 --AllowMultipleInstances";

@@ -7,7 +7,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+//
 public class BCI_Class {
 
     // Applications present in BCI2000

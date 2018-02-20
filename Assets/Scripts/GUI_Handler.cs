@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System;
 
 public class GUI_Handler : MonoBehaviour {
-
+    //
     public UnityEngine.UI.InputField subjectInfo;
 
 	public GameObject WelcomeText, userNum, Name1, Name2;
@@ -99,7 +99,8 @@ public class GUI_Handler : MonoBehaviour {
 		
 	void TaskOnClick(string task)
 	{
-		if (task == "Traditional") {
+		if (task == "Traditional")
+        {
 			traditionalButton.transform.localScale = new Vector3 (0, 0, 0);
 			customButton.transform.localScale = new Vector3 (0, 0, 0);
 			SignalSource.transform.localScale = new Vector3 (1, 1, 1);
@@ -111,7 +112,8 @@ public class GUI_Handler : MonoBehaviour {
 			configureButton.transform.localScale = new Vector3 (1, 1, 1);
 			WelcomeText.transform.localScale = new Vector3 (0, 0, 0);
 
-		} else if (task == "Custom") {	
+		} else if (task == "Custom")
+        {	
 			traditionalButton.transform.localScale = new Vector3 (0, 0, 0);
 			customButton.transform.localScale = new Vector3 (0, 0, 0);
 			motorImageryButton.transform.localScale = new Vector3 (1, 1, 1);
@@ -120,13 +122,16 @@ public class GUI_Handler : MonoBehaviour {
 			LRButton.transform.localScale = new Vector3 (0, 0, 0);
 			UDButton.transform.localScale = new Vector3 (0, 0, 0);
 			TwoDButton.transform.localScale = new Vector3 (0, 0, 0);
-		} else if (task == "showMI") {
+		} else if (task == "showMI")
+        {
 			LRButton.transform.localScale = new Vector3 (.5f, .5f, .5f);
 			UDButton.transform.localScale = new Vector3 (.5f, .5f, .5f);
 			TwoDButton.transform.localScale = new Vector3 (.5f, .5f, .5f);
 			motorImageryButton.transform.localScale = new Vector3 (0, 0, 0);
 			P300Button.transform.localScale = new Vector3 (0, 0, 0);
-		} else if (task == "LR" || task == "UD" || task == "2D") {
+		}
+        else if (task == "LR" || task == "UD" || task == "2D")
+        {
 			miTask = task;
 			UnityEngine.SceneManagement.SceneManager.LoadScene ("MI");
 			LRButton.transform.localScale = new Vector3 (0, 0, 0);
@@ -134,7 +139,9 @@ public class GUI_Handler : MonoBehaviour {
 			TwoDButton.transform.localScale = new Vector3 (0, 0, 0);
 			WelcomeText.transform.localScale = new Vector3 (0, 0, 0);
 			sceneCam.transform.Translate (0, 0, -10);
-		} else if (task == "Configure") {
+		}
+        else if (task == "Configure")
+        {
 			string selectedApp = SignalApplication.options [SignalApplication.value].text;
 			SignalSource.transform.localScale = new Vector3 (0, 0, 0);
 			SignalProcessing.transform.localScale = new Vector3 (0, 0, 0);
