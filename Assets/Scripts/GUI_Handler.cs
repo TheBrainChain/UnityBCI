@@ -6,8 +6,10 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Diagnostics;
 using System;
-
+using SFB;
 public class GUI_Handler : MonoBehaviour {
+    private string _path;
+    public bool guiSwitch = false;
     //
     public UnityEngine.UI.InputField subjectInfo;
 
@@ -15,9 +17,10 @@ public class GUI_Handler : MonoBehaviour {
 	public GameObject Inputfield, batchFileField;
 	public Dropdown SignalSource, SignalProcessing, SignalApplication;
 
-	public InputField batchFile, parameterFile, userName;
+	public InputField batchFile, userName;
+    public Button parameterFile;
 
-	public GameObject GUICanvas;
+    public GameObject GUICanvas;
 
 
 	public string miTask;
@@ -37,7 +40,7 @@ public class GUI_Handler : MonoBehaviour {
 		SignalProcessing = GameObject.Find ("Signal Processing").GetComponent<Dropdown> ();
 		SignalApplication = GameObject.Find ("Signal Application").GetComponent<Dropdown> ();
 		batchFile = GameObject.Find ("Batch file").GetComponent<InputField> ();
-		parameterFile = GameObject.Find ("Parameter file").GetComponent<InputField> ();
+		parameterFile = GameObject.Find ("Parameter file").GetComponent<Button> ();
 		userName = GameObject.Find ("User name").GetComponent<InputField> ();
 		configureButton = GameObject.Find ("Configure").GetComponent<Button> ();
 
@@ -169,7 +172,33 @@ public class GUI_Handler : MonoBehaviour {
 
 void Update()
 {
-	GetComponent<BCI_Task> ().Update ();
+	//GetComponent<BCI_Task> ().Update ();
 
 }
+    public void buttonClick() {
+        //guiSwitch = true;
+        WriteResult(StandaloneFileBrowser.OpenFilePanel("Open File", "", "", false));
+
+    }
+
+   
+    public void WriteResult(string[] paths)
+    {
+        if (paths.Length == 0)
+        {
+            return;
+        }
+
+        _path = "";
+        foreach (var p in paths)
+        {
+            _path += p + "\n";
+        }
+    }
+
+    public void WriteResult(string path)
+    {
+        _path = path;
+    }
+
 }
