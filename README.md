@@ -29,8 +29,7 @@ This will load a simple scene with a cursor moving between two targets via BCI20
 - Finish enterprise migration
 - Add Leap Motion, Hue, Roku, and TP-Link libraries/scripts
 - Cleanup prefabs for 1/2D SMR based tasks
-- Create robust minimal viable scene
-- Cleanup code (merge conflicts galore from enterprise/local repos)
+- Replace AppConnector with [WebSocket protocol](https://github.com/cronelab/bci2000web/tree/master/src/custom)
 - DOCUMENTATION!!!
 
 

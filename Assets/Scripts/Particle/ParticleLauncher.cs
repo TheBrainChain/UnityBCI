@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 using System.Diagnostics;
-using Leap.Unity;
-using Leap;
+//using Leap.Unity;
+//using Leap;
 
 public class ParticleLauncher : MonoBehaviour {
 
@@ -21,7 +21,7 @@ public class ParticleLauncher : MonoBehaviour {
 	private GameObject[] Target;
 
 
-	private LeapServiceProvider provider;
+	//private LeapServiceProvider provider;
 
 	void Start () 
 	{
@@ -39,45 +39,45 @@ public class ParticleLauncher : MonoBehaviour {
 	}
 
 
-	void fireWithLeap()
-	{
-		Frame currentFrame = provider.CurrentFrame;
+	//void fireWithLeap()
+	//{
+	//	Frame currentFrame = provider.CurrentFrame;
 
-		if (currentFrame.Hands.Count > 1)
-		{
-			List<Hand> hands = currentFrame.Hands;
+	//	if (currentFrame.Hands.Count > 1)
+	//	{
+	//		List<Hand> hands = currentFrame.Hands;
 
-			Hand hand1 = hands [0];
-			Hand hand2 = hands [1];
+	//		Hand hand1 = hands [0];
+	//		Hand hand2 = hands [1];
 
-			float pitch1 = hand1.Direction.Pitch;
-			float pitch2 = hand2.Direction.Pitch;
+	//		float pitch1 = hand1.Direction.Pitch;
+	//		float pitch2 = hand2.Direction.Pitch;
 
-		//	if ((hand1.GrabStrength < .9f && hand1.GrabStrength > .4f) || (hand2.GrabStrength < .9f && hand2.GrabStrength > .8f))
-			//{
-				if (hand1.IsRight && hand1.GrabStrength > 0.8f)
-				{
-					particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Right").transform.position;
+	//	//	if ((hand1.GrabStrength < .9f && hand1.GrabStrength > .4f) || (hand2.GrabStrength < .9f && hand2.GrabStrength > .8f))
+	//		//{
+	//			if (hand1.IsRight && hand1.GrabStrength > 0.8f)
+	//			{
+	//				particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Right").transform.position;
 
-				} 
-				else if (hand2.IsLeft && hand2.GrabStrength > 0.8f)
-				{
-					particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Left").transform.position;
+	//			} 
+	//			else if (hand2.IsLeft && hand2.GrabStrength > 0.8f)
+	//			{
+	//				particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Left").transform.position;
 
-				} 
-				else if (hand2.IsRight && hand2.GrabStrength > 0.8f)
-				{
-					particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Right").transform.position;
+	//			} 
+	//			else if (hand2.IsRight && hand2.GrabStrength > 0.8f)
+	//			{
+	//				particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Right").transform.position;
 
-				} 
-				else if (hand1.IsLeft && hand1.GrabStrength > 0.8f)
-				{
-					particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Left").transform.position;
+	//			} 
+	//			else if (hand1.IsLeft && hand1.GrabStrength > 0.8f)
+	//			{
+	//				particleLauncher.transform.position = GameObject.Find ("LoPoly_Hand_Mesh_Left").transform.position;
 
-				}
-		//	}
-		}
-	}
+	//			}
+	//	//	}
+	//	}
+	//}
 
 
 
