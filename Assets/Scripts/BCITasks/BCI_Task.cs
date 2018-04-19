@@ -27,9 +27,9 @@ public class BCI_Task : MonoBehaviour
 	private string selectedSource, selectedProcessing, selectedApp;
 	public Dropdown SignalSource, SignalProcessing, SignalApplication;
 
+    public string BCI2000Location = "D:\\Projects\\Hopkins\\GIT_bci2000web\\prog";
 
-
-	public bool skip = false;
+    public bool skip = false;
 
  	// Target, session, and score counter
   	public int overallNum = 0;
@@ -43,9 +43,9 @@ public class BCI_Task : MonoBehaviour
 
 
 	public void OpenShell(bool start)
-	{	
-		BCIinst[1] = new BCI_Class ("127.0.0.1", 55404);
-		ProcessStartInfo PSI = new ProcessStartInfo("Assets\\BCI2000\\prog\\operator.exe");
+	{
+        BCIinst[1] = new BCI_Class("127.0.0.1", 55404);
+        ProcessStartInfo PSI = new ProcessStartInfo(BCI2000Location+"\\operator.exe");
 		PSI.Arguments = "--StartupIdle --Telnet 127.0.0.1:" + "3"+ "997 --AllowMultipleInstances";
 		Process.Start(PSI);
 
@@ -53,7 +53,6 @@ public class BCI_Task : MonoBehaviour
 		BCIinst[1].stream = BCIinst[1].tcpClient.GetStream();
 		if (start == true) {
 			configureTask ();
-			//Update ();
 		}
 	}
 
@@ -61,12 +60,12 @@ public class BCI_Task : MonoBehaviour
 	{
 		BCIinst[1].tcpClient = new TcpClient("127.0.0.1", 3997);
 		BCIinst[1].stream = BCIinst[1].tcpClient.GetStream();
-
+        UnityEngine.Debug.Log(app);
 		string msg = "STARTUP SYSTEM * SignalSource:" + num+ "000 SignalProcessing:" + num+ "001 Application:" + num+ "002";
 		string msgX = "Change directory Assets\\BCI2000\\prog";
 		string msg1 = "Start executable " + source + " 127.0.0.1:" + num+ "000 --AllowMultipleInstances";
 		string msg2 = "Start executable " + process + " 127.0.0.1:" + num+ "001 --AllowMultipleInstances";
-		string msg3 = "Start executable " + app.Substring(0,10) + " 127.0.0.1:" + num+ "002 --AllowMultipleInstances";
+		string msg3 = "Start executable " + app + " 127.0.0.1:" + num+ "002 --AllowMultipleInstances";
 		string msg4 = "Wait for Connected";
 		string msg5 = "Load parameterfile ..\\parms\\VR_"+app.Substring(11,2)+"_Candle.prm";
 		string msg6 = "Set config";
