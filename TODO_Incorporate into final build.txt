@@ -1,3 +1,0 @@
-Leap Motion support, all I oT support
-P300 Speller
-IoT scene template

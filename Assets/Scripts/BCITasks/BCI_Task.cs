@@ -18,9 +18,9 @@ public class BCI_Task : MonoBehaviour
 
   	// Objects related to the Player and controllers
   	public GameObject LController,RController,Player;
-	private SteamVR_Controller.Device controller {get{return SteamVR_Controller.Input((int) RController.GetComponent<SteamVR_TrackedObject>().index);}}
-  	private Valve.VR.EVRButtonId triggerButton = Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger;
-  	private Valve.VR.EVRButtonId gripButton = Valve.VR.EVRButtonId.k_EButton_Grip;
+	//private SteamVR_Controller.Device controller {get{return SteamVR_Controller.Input((int) RController.GetComponent<SteamVR_TrackedObject>().index);}}
+ // 	private Valve.VR.EVRButtonId triggerButton = Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger;
+ // 	private Valve.VR.EVRButtonId gripButton = Valve.VR.EVRButtonId.k_EButton_Grip;
   	private bool triggerButtonDown,triggerButtonUp,triggerButtonPressed;
 
 
@@ -169,17 +169,17 @@ public class BCI_Task : MonoBehaviour
 
 
 		//Resets VR views so it starts in the proper position
-		if (UnityEngine.XR.XRDevice.isPresent)
-		{
-			triggerButton = Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger;
-			gripButton = Valve.VR.EVRButtonId.k_EButton_Grip;
-			Valve.VR.OpenVR.System.ResetSeatedZeroPose ();
-			Valve.VR.OpenVR.Compositor.SetTrackingSpace (
-				Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated);
-			//Disable blue Vive box around player
-			Player.GetComponent<MeshRenderer> ().enabled = false;
+		//if (UnityEngine.XR.XRDevice.isPresent)
+		//{
+		//	triggerButton = Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger;
+		//	gripButton = Valve.VR.EVRButtonId.k_EButton_Grip;
+		//	Valve.VR.OpenVR.System.ResetSeatedZeroPose ();
+		//	Valve.VR.OpenVR.Compositor.SetTrackingSpace (
+		//		Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated);
+		//	//Disable blue Vive box around player
+		//	Player.GetComponent<MeshRenderer> ().enabled = false;
 
-		}
+		//}
 	}
 
   public void moveWithBCI()

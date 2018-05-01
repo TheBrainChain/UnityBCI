@@ -5,7 +5,7 @@ using UnityEngine.VR;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
-using SFB;
+//using SFB;
 
 public class GUI_Handler : MonoBehaviour {
     private string _path;
@@ -175,31 +175,31 @@ void Update()
 {
 	//GetComponent<BCI_Task> ().Update ();
 
-}
-    public void buttonClick() {
-        //guiSwitch = true;
-        WriteResult(StandaloneFileBrowser.OpenFilePanel("Open File", "", "", false));
+//}
+//    public void buttonClick() {
+//        //guiSwitch = true;
+//        WriteResult(StandaloneFileBrowser.OpenFilePanel("Open File", "", "", false));
 
-    }
+//    }
 
    
-    public void WriteResult(string[] paths)
-    {
-        if (paths.Length == 0)
-        {
-            return;
-        }
+    //public void WriteResult(string[] paths)
+    //{
+    //    if (paths.Length == 0)
+    //    {
+    //        return;
+    //    }
 
-        _path = "";
-        foreach (var p in paths)
-        {
-            _path += p + "\n";
-        }
+    //    _path = "";
+    //    foreach (var p in paths)
+    //    {
+    //        _path += p + "\n";
+    //    }
     }
 
-    public void WriteResult(string path)
-    {
-        _path = path;
-    }
+    //public void WriteResult(string path)
+    //{
+    //    _path = path;
+    //}
 
 }

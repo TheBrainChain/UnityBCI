@@ -1,0 +1,3 @@
+[submodule "Assets/StreamingAssets/bci2000web"]
+	path = Assets/StreamingAssets/bci2000web
+	url = https://github.com/cronelab/bci2000web.git
