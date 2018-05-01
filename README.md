@@ -1,4 +1,5 @@
 # UnityBCI
++[![DOI](https://zenodo.org/badge/113076950.svg)](https://zenodo.org/badge/latestdoi/113076950)
 
 Unity application for communicating to BCI2000. Can send local/remote commands to control BCI2000's operator layer as well as set/get parameters/states to replace the BCI2000 native application layer with Unity.
 
@@ -20,11 +21,11 @@ Might need to install Leap Motion modules
 
 This will load a simple scene with a cursor moving between two targets via BCI2000
 
-Now using ![BCI2000Web](https://github.com/cronelab/bci2000web). Need to install via npm.
+Now using [BCI2000Web](https://github.com/cronelab/bci2000web). Need to install via npm.
 
 # To do:
 - Add Leap Motion, Hue, Roku, and TP-Link libraries/scripts
 - Cleanup prefabs for 1/2D SMR based tasks
 
 
-This work can be found in it's academic form ![here](https://ieeexplore.ieee.org/document/8302482/)
+This work can be found in it's academic form [here](https://ieeexplore.ieee.org/document/8302482/)
