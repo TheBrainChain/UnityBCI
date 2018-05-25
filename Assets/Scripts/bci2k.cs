@@ -4,174 +4,385 @@ using System;
 using UnityEngine;
 using BestHTTP.WebSocket;
 using UnityEngine.UI;
-
+using System.Diagnostics;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 public class bci2k : MonoBehaviour
 {
-    public Button openWSButton;
-    public Button sendMsgButton;
-    public Button closeWSButton;
-    public Button wordTaskButton;
-    WebSocket webSocket;
+    public string signalName;
+    string[] signalProps;
+    List<float> signal = new List<float>();
+
+    List<string> stateName = new List<string>();
+    List<int> bitWidth = new List<int>();
+    List<int> defaultValue = new List<int>();
+    List<int> byteLocation = new List<int>();
+    List<int> bitLocation = new List<int>();
+    List<string> signalChannels = new List<string>();
+    List<string> signalElements = new List<string>();
+    List<string> Words = new List<string>();
+    Dictionary<string, int> vecOrder = new Dictionary<string, int>();
+    Dictionary<string, int> stateOrder = new Dictionary<string, int>();
+    public List<KeyValuePair<string, int>> stateFormat;
+    public List<KeyValuePair<string, int>> stateVecOrder;
+    public Button openMainWSButton, openSourceWSButton, openFilterWSButton, openConnectorWSButton;
+    public Button sendMsgButton, closeButton, openBCIButton, switchSceneButton;
+    public WebSocket[] websockets;
+    public WebSocket mainWebsocket, filterWebsocket, connectorWebsocket, sourceWebsocket;
     public InputField txt2send;
-    public string address = "ws://127.0.0.1";
 
-    //string msgToSend = "E 1 Get System State";
-    string msgToSend = "E 1 Reset System; Startup system localhost; Start executable SignalGenerator --local; Start executable SpectralSignalProcessingMod --local; Start executable StimulusPresentationCronelab --local; Wait for Connected; Set parameter SubjectName TESTSubject; Set parameter SubjectSession 1; Set Parameter SamplingRate 1000Hz; Load Parameterfile ../parms.ecog/SpectralSigProc.prm; Set Parameter WSSpectralOutputServer *:20203; Load Parameterfile ../web/paradigms/WordTasks/words.prm; Set Parameter CaptionSwitch 1; Set Parameter AudioSwitch 0; Load Parameterfile ../parms.ecog/screen_setup.prm; Load Parameterfile ../web/paradigms/WordTasks/sequences/reading/seq1.prm; Set Parameter WSConnectorServer *:20323; Set Parameter WSSourceServer *:20100; Set Config; Wait for Resting; ";
-    string showWin = "E 1 Show Window";
-    string hideWin = "E 1 Hide Window";
-    string resetSys = "E 1 Reset System";
-    string startSys = "Startup system localhost";
-    //string startSig = "Start executable SignalGenerator --local";
-    //string startPrc = "Start executable SpectralSignalProcessingMod --local";
-    //string startApp = "Start executable StimulusPresentationCronelab --local";
-    //string WaitConn = "Wait for Connected";
-    //string setPrmSNTest = "Set parameter SubjectName TESTSubject";
-    //string setPrmSS1 = "Set parameter SubjectSession 1";
-    //string setPrmDataFile = "Set parameter DataFile "'%24%7bSubjectName%7d/WordReading/%24%7bSubjectName%7d_WordReading_S%24%7bSubjectSession%7dR%24%7bSubjectRun%7d.%24%7bFileFormat%7d'"";
-    //string setPrmSR1000 = "Set Parameter SamplingRate 1000Hz";
-    //string loadPrmFileSpecSigPrc = "Load Parameterfile../parms.ecog/SpectralSigProc.prm";
-    //string setPrmWOS = "Set Parameter WSSpectralOutputServer*:20203";
-    //string loadPrmFileWords = "Load Parameterfile../web/paradigms/WordTasks/words.prm";
-    //string setPrmCS1 = "Set Parameter CaptionSwitch 1";
-    //string setPrmAS0 = "Set Parameter AudioSwitch 0";
-    //string loadPrmFileScreenSetup = "Load Parameterfile../parms.ecog/screen_setup.prm";
-    //string loadPrmFileRead1 = "Load Parameterfile../web/paradigms/WordTasks/sequences/reading/seq1.prm";
-    //string setPrmWCS = "Set Parameter WSConnectorServer*:20323";
-    //string setPrmWSS = "Set Parameter WSSourceServer*:20100";
-    string setConf = "Set Config;";
-    //string waitRest = "Wait for Resting";
-    string exit = "Exit;";
-    string stop = "Stop;";
-    string start = "Start";
-
-    private string startExecutable(string prm, string loc)
+    public int stimCode;
+    public string stim;
+    public string showWin = "E 1 Show Window";
+    public string hideWin = "E 1 Hide Window";
+    public string resetSys = "E 1 Reset System";
+    public string startSys = "Startup system localhost";
+    public string setConf = "Set Config;";
+    public string exit = "Exit;";
+    public string stop = "Stop;";
+    public string start = "Start";
+    public string sysState = "Get System State";
+    public string startExecutable(string prm, string loc)
     {
         return string.Format("Start executable {0} --{1}; ", prm, loc);
     }
-    private string waitFor(string prm)
+    public string waitFor(string prm)
     {
         return string.Format("Wait for {0}; ", prm);
     }
-
-    private string setWatch(string prm, string ip, string port)
+    public string setWatch(string prm, string ip, string port)
     {
         return string.Format("Add watch {0} at {1}:{2}; ", prm, ip, port);
     }
-
-    private string loadParameterFile(string prm)
+    public string loadParameterFile(string prm)
     {
         return string.Format("Load Parameterfile {0}; ", prm);
     }
-
-    private string setParameter(string prm1, string prm2)
+    public string setParameter(string prm1, string prm2)
     {
         return string.Format("Set Parameter {0} {1}; ", prm1, prm2);
     }
-    private string getParameter(string prm = "Stimuli(1,2) ")
+    public string getParameter(string prm = "Stimuli(1,2) ")
     {
         return string.Format("Get Parameter {0};", prm);
     }
-
-    private string listParameter(string prm = "Stimuli")
+    public string listParameter(string prm = "Stimuli")
     {
         return string.Format("List Parameter {0}; ", prm);
     }
 
+    public int ID;
+
     private void Start()
     {
-        openWSButton.GetComponent<Button>().onClick.AddListener(openWS);
+        websockets = new WebSocket[4];
+        websockets[0] = mainWebsocket;
+        websockets[1] = filterWebsocket;
+        websockets[2] = sourceWebsocket;
+        websockets[3] = connectorWebsocket;
+        closeButton.GetComponent<Button>().onClick.AddListener(OnDestroy);
+
+        openMainWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(mainWebsocket, "ws://127.0.0.1:80", 0); });
+        openFilterWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(filterWebsocket, "ws://127.0.0.1:20203", 1); });
+        openSourceWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(sourceWebsocket, "ws://127.0.0.1:20100", 2); });
+        openConnectorWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(connectorWebsocket, "ws://127.0.0.1:20323", 3); });
         sendMsgButton.GetComponent<Button>().onClick.AddListener(sendWSmsg);
-        closeWSButton.GetComponent<Button>().onClick.AddListener(closeWS);
-        wordTaskButton.GetComponent<Button>().onClick.AddListener(WordTasks);
+        openBCIButton.GetComponent<Button>().onClick.AddListener(openBCI);
+        switchSceneButton.GetComponent<Button>().onClick.AddListener(switchScene);
+
     }
-    private void WordTasks()
+
+    void switchScene() {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Hopkins",
+            UnityEngine.SceneManagement.LoadSceneMode.Additive);
+    }
+
+    void openWS(WebSocket ws, string address, int IDent)
     {
-        //Set Parameter WSConnectorServer *:20323; Set Parameter WSSourceServer *:20100; Set Config; Wait for Resting;
-        if (webSocket != null && webSocket.IsOpen)
+        if (ws == null)
         {
-            webSocket.Send(
-                "E 1 " +
-                "Reset System; " +
-                "Startup system localhost; " +
-                startExecutable("SignalGenerator", "local") +
-                startExecutable("SpectralSignalProcessingMod", "local") +
-                startExecutable("StimulusPresentationCroneLab", "local") +
-                waitFor("Connected") +
-                setParameter("SubjectName", "TestSubject") +
-                setParameter("SubjectSession", "1") +
-                setParameter("DataFile", "%24%7bSubjectName%7d/WordReading/%24%7bSubjectName%7d_WordReading_S%24%7bSubjectSession%7dR%24%7bSubjectRun%7d.%24%7bFileFormat%7d") +
-                setParameter("SamplingRate", "1000Hz") +
-                loadParameterFile("../parms.ecog/SpectralSigProc.prm") +
-                setParameter("WSSpectralOutputServer", "*:20203") +
-                loadParameterFile("../web/paradigms/WordTasks/words.prm") +
-                setParameter("CaptionSwitch", "1") +
-                setParameter("AudioSwitch", "0") +
-                loadParameterFile("../parms.ecog/screen_setup.prm") +
-                loadParameterFile("../web/paradigms/WordTasks/sequences/reading/seq1.prm") +
-                setParameter("WSConnectorServer", "*:20323") +
-                setParameter("WSSourceServer", "*:20100") +
-                setConf +
-                waitFor("Resting")
-            );
+            ID = IDent;
+            websockets[ID] = new WebSocket(new Uri(address));
+            websockets[ID].OnOpen += OnOpen;
+            websockets[ID].OnClosed += OnClosed;
+            websockets[ID].OnError += OnError;
+            websockets[ID].OnMessage += OnMessageReceived;
+            websockets[ID].OnBinary += OnBinaryMessageReceived;
+            websockets[ID].Open();
+            //setup retry?
         }
     }
-    void openWS()
-    {
-        if (webSocket == null)
-        {
-            // Create the WebSocket instance
-            webSocket = new WebSocket(new Uri(address));
 
-            // Subscribe to the WS events
-            webSocket.OnOpen += OnOpen;
-            webSocket.OnMessage += OnMessageReceived;
-            webSocket.OnClosed += OnClosed;
-            webSocket.OnError += OnError;
-
-            // Start connecting to the server
-            webSocket.Open();
-        }
-    }
     void sendWSmsg()
     {
-        if (webSocket != null && webSocket.IsOpen)
+        print(mainWebsocket.IsOpen);
+        if (websockets[ID] != null && websockets[ID].IsOpen)
         {
-            webSocket.Send("E 1 " + txt2send.text);
+            websockets[ID].Send("E 1 " + txt2send.text);
         }
     }
-    void closeWS()
-    {
-        webSocket.Close(1000, "Bye!");
 
-    }
     void OnDestroy()
     {
-        if (webSocket != null)
-            webSocket.Close();
+        //mainWebsocket.Close();
+        //filterWebsocket.Close();
+        //sourceWebsocket.Close();
+        //connectorWebsocket.Close();
     }
+
+    private void decodeGenericSignal(byte[] message)
+    {
+        byte signalType = message[2];
+        var nChannels = message[3];
+        //nChannels += message[4] //if #channels > 255
+        var nElements = message[5];
+        //nElements += message[6] //if #elements > 255
+
+        //print(signalType);  //0: int16, 1: float24, 2: float32, 3: int32
+        //print(nChannels);
+        //print(nElements);
+        byte[] signalArray = new byte[message.Length - 7];
+        Array.Copy(message, 7, signalArray, 0, message.Length - 7);
+
+        signal.Clear();
+        for (int i = 0; i < nChannels * nElements; i++)
+        {
+            byte[] newArr = new byte[4];
+            Array.Copy(signalArray, (4 * i), newArr, 0, 4);
+            float myFloat = BitConverter.ToSingle(newArr, 0);
+            signal.Add(myFloat);
+        }
+    }
+
+    private void decodeStateFormat(byte[] message)
+    {
+        var msg = System.Text.Encoding.ASCII.GetString(message).Split('\n');
+        foreach (var mess in msg)
+        {
+            if (mess != "")
+            {
+                stateName.Add(mess.Split(' ')[0]);
+                bitWidth.Add(int.Parse(mess.Split(' ')[1]));
+                defaultValue.Add(int.Parse(mess.Split(' ')[2]));
+                byteLocation.Add(int.Parse(mess.Split(' ')[3]));
+                bitLocation.Add(int.Parse(mess.Split(' ')[4]));
+            }
+        }
+        
+        for (int i=0;i<stateName.Count; i++)
+        {
+            vecOrder.Add(stateName[i], byteLocation[i] * 8 + bitLocation[i]);
+            stateOrder.Add(stateName[i], bitWidth[i]);
+        }
+        stateFormat = vecOrder.ToList();
+        stateVecOrder = stateOrder.ToList();
+
+        //Sort the list based on key values
+        stateFormat.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+    }
+
+    private void decodeSignalProperties(byte[] message)
+    {
+        string strMessage = System.Text.Encoding.ASCII.GetString(message);
+        strMessage = strMessage.Replace("{", " { ");
+        strMessage = strMessage.Replace("}", " } ");
+
+
+        var msg = strMessage.Split(' ').ToList();
+;
+        for (int i = 0; i < msg.Count; i++)
+        {
+            if (string.IsNullOrWhiteSpace(msg[i]))
+            {
+                msg.Remove(msg[i]);
+            }
+        }
+
+
+        signalName = msg[0];
+
+        var count = 1;
+        for (int i = 0; i < msg.Count; i++)
+        {
+            if (msg[i] == "{")
+            {
+                i++;
+                while (msg[i] != "}")
+                {
+                    if (count == 1)
+                    {
+                        signalChannels.Add(msg[i]);
+                    }
+                    else if(count == 2)
+                    {
+                        signalElements.Add(msg[i]);
+                    }
+                    i++;
+                }
+                count++;
+            }
+        }
+        signalProps = new string[6 * signalChannels.Count];
+
+        for (int i = 0; i < signalChannels.Count; i++)
+        {
+            signalProps[i*6] = signalChannels[i];
+            signalProps[i * 6 + 1] = signalElements[(i * 4) + i + 0];
+            signalProps[i * 6 + 2] = signalElements[(i * 4) + i + 1];
+            signalProps[i * 6 + 3] = signalElements[(i * 4) + i + 2];
+            signalProps[i * 6 + 4] = signalElements[(i * 4) + i + 3];
+            signalProps[i * 6 + 5] = signalElements[(i * 4) + i + 4];
+        }
+    }
+
+    private void decodeStateVector(byte[] message)
+    {
+        //for (int i = 1; i < message.Length; i++)
+        //{
+        //    print(message[i]);
+        //}
+        //        int i = 1;
+        //List<byte> a = new List<byte>();
+        //while (message[i] != 0)
+        //{
+        //    a.Add(message[i]);
+        //    i++;
+        //}
+
+        var zeroInd = 1;
+        List<byte> stateVectorLength = new List<byte>();
+        List<byte> subsStateVectors = new List<byte>();
+
+        for (int i = 1; i<message.Length;i++)
+        {
+            print("" + i + ": "+ message[i]);
+           while(message[i] != 0 && zeroInd < 3)
+            {
+                print("" + i + ": " + message[i]);
+
+                if (zeroInd == 1)
+                {
+                    stateVectorLength.Add(message[i]);
+                }
+                else {
+                    subsStateVectors.Add(message[i]);
+                }
+                i++;
+            }
+            zeroInd++;
+        }
+
+        print(System.Text.Encoding.ASCII.GetString(stateVectorLength.ToArray()));       //56        //wtf do these mean?
+        print(System.Text.Encoding.ASCII.GetString(subsStateVectors.ToArray()));        //101
+
+    }
+
+    void OnBinaryMessageReceived(WebSocket ws, byte[] message)
+    {
+        if (message[0] == 3)
+        {
+            //Runs once upon open to give you the byte location and bit width of the states.
+            decodeStateFormat(message);
+            //print(stateFormat[0].Key);
+            //print(stateFormat[0].Value);
+            //print(stateVecOrder[0].Key);
+            //print(stateVecOrder[0].Value);
+        }
+        else if (message[0] == 4)
+        {
+            if (message[1] == 1)
+            {
+                decodeGenericSignal(message);
+                print(signal[0]); //First Channel
+                //print(signal[0+sampleBlockSize] //SecondChannel
+
+
+
+            }
+            if (message[1] == 3)
+            {
+                decodeSignalProperties(message);
+                //print("Channel: " + signalProps[0] + " " + "Offset: " + signalProps[1]);
+
+            }
+            else {
+                //UnityEngine.Debug.Log("This supplement is not currently supported");
+            }
+        }
+        else if (message[0] == 5)
+        {
+            //decodeStateVector(message);
+        }
+        else
+        {
+            //UnityEngine.Debug.Log("Unsupported descriptor");
+        }
+    }
+
+    void OnMessageReceived(WebSocket ws, string message)
+    {
+        if (message[0].ToString().StartsWith("O"))
+        {
+            if (txt2send.text == "List Parameter Stimuli")
+            {
+                print(message);
+                int stimAmt = int.Parse(message.Substring(message.IndexOf("}") + 1, 4));
+                char[] separators = new char[] { ' ' };
+                print(stimAmt);
+                //for (int i = 0; i < stimAmt; i++)
+                //{
+                //    Words.Add(message.Split(separators, StringSplitOptions.RemoveEmptyEntries)[i + 11]);
+                //    print(Words[i]);
+                //}
+            }
+            if (message[2].ToString().StartsWith("2"))
+            {
+                stim = (message.Substring(3, message.Length - 3));
+            }
+            if (message[2].ToString().StartsWith("1"))
+            {
+                stimCode = int.Parse(message.Substring(3, message.Length - 3));
+            }
+            //else
+            //{
+            //    print(message);
+            //}
+        }
+    }
+
+    void OnClosed(WebSocket ws, UInt16 code, string message)
+    {
+        print(string.Format("-WebSocket closed! Code: {0} Message: {1}\n", code, message));
+        mainWebsocket = null;
+        sourceWebsocket = null;
+        filterWebsocket = null;
+        connectorWebsocket = null;
+    }
+
+    void OnError(WebSocket ws, Exception ex)
+    {
+        string errorMsg = string.Empty;
+        if (!ws.IsOpen)
+        {
+            print("A");
+            ws.Open();
+        }
+
+        print(string.Format("-An error occured: {0}\n", (ex != null ? ex.Message : "Unknown Error " + errorMsg)));
+        mainWebsocket = null;
+    }
+
     void OnOpen(WebSocket ws)
     {
         print("Websocket is open!");
     }
-    void OnMessageReceived(WebSocket ws, string message)
-    {
-        print(string.Format("-Message received: {0}\n", message));
-    }
-    void OnClosed(WebSocket ws, UInt16 code, string message)
-    {
-        print(string.Format("-WebSocket closed! Code: {0} Message: {1}\n", code, message));
-        webSocket = null;
-    }
-    void OnError(WebSocket ws, Exception ex)
-    {
-        string errorMsg = string.Empty;
-#if !UNITY_WEBGL || UNITY_EDITOR
-        if (ws.InternalRequest.Response != null)
-            errorMsg = string.Format("Status Code from Server: {0} and Message: {1}", ws.InternalRequest.Response.StatusCode, ws.InternalRequest.Response.Message);
-#endif
 
-        print(string.Format("-An error occured: {0}\n", (ex != null ? ex.Message : "Unknown Error " + errorMsg)));
-        webSocket = null;
+    public void openBCI()
+    {
+        ProcessStartInfo PSI = new ProcessStartInfo("START.bat");
+        PSI.WorkingDirectory = "Assets\\StreamingAssets\\BCI2000";
+        Process.Start(PSI);
     }
 }
 

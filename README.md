@@ -1,5 +1,5 @@
 # UnityBCI
-+[![DOI](https://zenodo.org/badge/113076950.svg)](https://zenodo.org/badge/latestdoi/113076950)
+[![DOI](https://zenodo.org/badge/113076950.svg)](https://zenodo.org/badge/latestdoi/113076950)
 
 Unity application for communicating to BCI2000. Can send local/remote commands to control BCI2000's operator layer as well as set/get parameters/states to replace the BCI2000 native application layer with Unity.
 
