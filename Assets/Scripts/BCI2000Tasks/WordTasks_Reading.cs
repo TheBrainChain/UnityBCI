@@ -13,7 +13,7 @@ public class WordTasks_Reading : MonoBehaviour
     public string IP = "127.0.0.1";            //bind it to the computer's IP adress that is running the VR app
     public int receivePort = 55404;
     public Thread receiveThread;
-
+    public int count =0;
     public UdpClient client;
     public TcpClient tcpClient;
     public NetworkStream stream;
@@ -43,7 +43,7 @@ public class WordTasks_Reading : MonoBehaviour
 
     private void Start()
     {
-        BCI2K = GameObject.Find("Main Camera").GetComponent<bci2k>();
+        BCI2K = GameObject.Find("BCI2000Manager").GetComponent<bci2k>();
         coroutine = UpdateStimCode(.05f);
         StartCoroutine(coroutine);
     }
@@ -72,6 +72,7 @@ public class WordTasks_Reading : MonoBehaviour
             BCI2K.setParameter("VisualizeSource", "0") +
             BCI2K.setParameter("VisualizeTiming", "0") +
             BCI2K.setParameter("WindowLeft", "-700") +
+            BCI2K.addState("ButtonPress", 16, 0) + 
             BCI2K.setConf +
             BCI2K.waitFor("Resting") //+
 //            BCI2K.start
@@ -116,6 +117,15 @@ public class WordTasks_Reading : MonoBehaviour
     {
         BCI2K.websockets[0].Send("E 1 Exit");
 
+    }
+    public void incrementState()
+    {
+        count++;
+        print("TEST");
+        BCI2K.websockets[0].Send(
+           "E 1 " +
+            BCI2K.setState("ButtonPress", count)
+        );
     }
     public void OnDestroy()
     {

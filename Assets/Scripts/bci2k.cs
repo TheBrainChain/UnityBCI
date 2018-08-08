@@ -8,6 +8,21 @@ using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.XR;
+using System.IO;
+using System.Text;
+
+[Serializable]
+public class externalConfig
+{
+    public string ipAddress;
+    public string hand;
+    public string timePerTarget;
+    public int targetToStartAt;
+    public string SignalSource;
+    // We could also define other variables here.
+}
+
 public class bci2k : MonoBehaviour
 {
     public string signalName;
@@ -27,11 +42,18 @@ public class bci2k : MonoBehaviour
     public List<KeyValuePair<string, int>> stateFormat;
     public List<KeyValuePair<string, int>> stateVecOrder;
     public Button openMainWSButton, openSourceWSButton, openFilterWSButton, openConnectorWSButton;
-    public Button sendMsgButton, closeButton, openBCIButton, switchSceneButton;
+    public Button sendMsgButton, closeButton, openBCIButton, switchMotorButton, switchWordButton;
     public WebSocket[] websockets;
     public WebSocket mainWebsocket, filterWebsocket, connectorWebsocket, sourceWebsocket;
     public InputField txt2send;
+    public string configFile;
 
+    public GameObject TaskManager;
+
+    public string IPaddress;
+    public string hand;
+
+    #region
     public int stimCode;
     public string stim;
     public string showWin = "E 1 Show Window";
@@ -71,31 +93,88 @@ public class bci2k : MonoBehaviour
     {
         return string.Format("List Parameter {0}; ", prm);
     }
+    public string setState(string name, int value)
+    {
+        return string.Format("Set STATE {0} {1}; ", name, value);
+    }
+    public string addState(string name, int bitWidth, int initialVal)
+    {
+        return string.Format("ADD STATE {0} {1} {2}; ", name, bitWidth, initialVal);
+    }
+    public string setEvent(string name, float value)
+    {
+        return string.Format("Set EVENT {0} {1}; ", name, value);
+    }
+    public string addEvent(string name, int bitWidth, float initialVal)
+    {
+        return string.Format("Add EVENT {0} {1} {2}; ", name, bitWidth, initialVal);
+    }
+    #endregion
 
     public int ID;
 
+    public string ReadFile(string filename)
+    {
+        StreamReader fileReader = new StreamReader(filename, Encoding.Default);
+        string returnString;
+        using (fileReader)
+            returnString = fileReader.ReadToEnd();
+        return returnString;
+    }
+
     private void Start()
     {
+        configFile = Application.streamingAssetsPath + "/config.json";
+        print(Application.streamingAssetsPath);
+
+        if (configFile != null && File.Exists(configFile))
+        {
+            var tempStruct = JsonUtility.FromJson<externalConfig>(ReadFile(configFile));
+            print(tempStruct);
+            IPaddress = tempStruct.ipAddress;
+            hand = tempStruct.hand;
+        }
         websockets = new WebSocket[4];
         websockets[0] = mainWebsocket;
         websockets[1] = filterWebsocket;
         websockets[2] = sourceWebsocket;
         websockets[3] = connectorWebsocket;
-        closeButton.GetComponent<Button>().onClick.AddListener(OnDestroy);
+        //closeButton.GetComponent<Button>().onClick.AddListener(OnDestroy);
 
-        openMainWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(mainWebsocket, "ws://127.0.0.1:80", 0); });
-        openFilterWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(filterWebsocket, "ws://127.0.0.1:20203", 1); });
-        openSourceWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(sourceWebsocket, "ws://127.0.0.1:20100", 2); });
-        openConnectorWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(connectorWebsocket, "ws://127.0.0.1:20323", 3); });
-        sendMsgButton.GetComponent<Button>().onClick.AddListener(sendWSmsg);
-        openBCIButton.GetComponent<Button>().onClick.AddListener(openBCI);
-        switchSceneButton.GetComponent<Button>().onClick.AddListener(switchScene);
-
+        //openMainWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(mainWebsocket, "ws://"+ IPaddress+":80", 0); });
+        //openFilterWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(filterWebsocket, "ws://" + IPaddress + ":20203", 1); });
+        //openSourceWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(sourceWebsocket, "ws://" + IPaddress + ":20100", 2); });
+        //openConnectorWSButton.GetComponent<Button>().onClick.AddListener(delegate { openWS(connectorWebsocket, "ws://" + IPaddress + ":20323", 3); });
+        //sendMsgButton.GetComponent<Button>().onClick.AddListener(sendWSmsg);
+        //openBCIButton.GetComponent<Button>().onClick.AddListener(openBCI);
+        //switchWordButton.GetComponent<Button>().onClick.AddListener(switchSceneWord);
+        //switchMotorButton.GetComponent<Button>().onClick.AddListener(switchSceneMotor);
+        openWS(mainWebsocket, "ws://"+ IPaddress+":80", 0);
     }
-
-    void switchScene() {
+    IEnumerator LoadStartVR(bool enabled)
+    {
+        yield return null;
+        XRSettings.enabled = enabled;
+    }
+    void switchSceneWord()
+    {
         UnityEngine.SceneManagement.SceneManager.LoadScene("Hopkins",
             UnityEngine.SceneManagement.LoadSceneMode.Additive);
+        switchMotorButton.gameObject.SetActive(false);
+        switchWordButton.gameObject.SetActive(false);
+        openBCIButton.gameObject.SetActive(false);
+        closeButton.gameObject.SetActive(false);
+        openMainWSButton.gameObject.SetActive(false);
+    }
+    void switchSceneMotor()
+    {
+        switchMotorButton.gameObject.SetActive(false);
+        switchWordButton.gameObject.SetActive(false);
+        openBCIButton.gameObject.SetActive(false);
+        closeButton.gameObject.SetActive(false);
+        openMainWSButton.gameObject.SetActive(false);
+        TaskManager.SetActive(true);
+
     }
 
     void openWS(WebSocket ws, string address, int IDent)
@@ -193,10 +272,10 @@ public class bci2k : MonoBehaviour
 ;
         for (int i = 0; i < msg.Count; i++)
         {
-            if (string.IsNullOrWhiteSpace(msg[i]))
-            {
-                msg.Remove(msg[i]);
-            }
+            //if (string.IsNullOrWhiteSpace(msg[i]))
+            //{
+            //    msg.Remove(msg[i]);
+            //}
         }
 
 
@@ -322,33 +401,33 @@ public class bci2k : MonoBehaviour
 
     void OnMessageReceived(WebSocket ws, string message)
     {
-        if (message[0].ToString().StartsWith("O"))
-        {
-            if (txt2send.text == "List Parameter Stimuli")
-            {
-                print(message);
-                int stimAmt = int.Parse(message.Substring(message.IndexOf("}") + 1, 4));
-                char[] separators = new char[] { ' ' };
-                print(stimAmt);
-                //for (int i = 0; i < stimAmt; i++)
-                //{
-                //    Words.Add(message.Split(separators, StringSplitOptions.RemoveEmptyEntries)[i + 11]);
-                //    print(Words[i]);
-                //}
-            }
-            if (message[2].ToString().StartsWith("2"))
-            {
-                stim = (message.Substring(3, message.Length - 3));
-            }
-            if (message[2].ToString().StartsWith("1"))
-            {
-                stimCode = int.Parse(message.Substring(3, message.Length - 3));
-            }
-            //else
-            //{
-            //    print(message);
-            //}
-        }
+        //if (message[0].ToString().StartsWith("O"))
+        //{
+        //    if (txt2send.text == "List Parameter Stimuli")
+        //    {
+        //        print(message);
+        //        int stimAmt = int.Parse(message.Substring(message.IndexOf("}") + 1, 4));
+        //        char[] separators = new char[] { ' ' };
+        //        print(stimAmt);
+        //        //for (int i = 0; i < stimAmt; i++)
+        //        //{
+        //        //    Words.Add(message.Split(separators, StringSplitOptions.RemoveEmptyEntries)[i + 11]);
+        //        //    print(Words[i]);
+        //        //}
+        //    }
+        //    if (message[2].ToString().StartsWith("2"))
+        //    {
+        //        stim = (message.Substring(3, message.Length - 3));
+        //    }
+        //    if (message[2].ToString().StartsWith("1"))
+        //    {
+        //        stimCode = int.Parse(message.Substring(3, message.Length - 3));
+        //    }
+        //    //else
+        //    //{
+        //    //    print(message);
+        //    //}
+        //}
     }
 
     void OnClosed(WebSocket ws, UInt16 code, string message)
@@ -376,12 +455,14 @@ public class bci2k : MonoBehaviour
     void OnOpen(WebSocket ws)
     {
         print("Websocket is open!");
+        switchSceneMotor();
+
     }
 
     public void openBCI()
     {
         ProcessStartInfo PSI = new ProcessStartInfo("START.bat");
-        PSI.WorkingDirectory = "Assets\\StreamingAssets\\BCI2000";
+        PSI.WorkingDirectory = "E:\\Projects\\Hopkins\\GIT\\GIT_bci2000web";
         Process.Start(PSI);
     }
 }
