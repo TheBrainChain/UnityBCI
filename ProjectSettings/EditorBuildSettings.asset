@@ -4,11 +4,5 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes:
-  - enabled: 1
-    path: Assets/Scenes/BCI2000Manager.unity
-    guid: 9ccd573a7e4870a42a289feed33bde34
-  - enabled: 1
-    path: Assets/Scenes/Hopkins.unity
-    guid: 1104d2c057d731543a5a3f5f221c689c
+  m_Scenes: []
   m_configObjects: {}
